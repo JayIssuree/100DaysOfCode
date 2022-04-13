@@ -21,7 +21,10 @@ while number_of_guesses > 0:
     else:
         print("Congratulations, you guessed correctly")
         break
-    print("Guess again")
     number_of_guesses -= 1
+    if number_of_guesses > 0:
+        print("Guess again")
+    else:
+        print("You took too many guesses")
 
 print("The number I was thinking of was: " + str(NUMBER))
