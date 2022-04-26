@@ -9,12 +9,19 @@ class Snake:
     
     def __init__(self):
         self.snake = []
+        self.create_snake()
+        self.head = self.snake[0]
+
+    def create_snake(self):
+        self.create_head()
+        self.add_tail()
+        self.add_tail()
+
+    def create_head(self):
         self.head = Turtle(shape="square")
         self.head.color("white")
         self.head.pu()
         self.snake.append(self.head)
-        self.add_tail()
-        self.add_tail()
 
     def add_tail(self):
         new_tail = Turtle(shape="square")
@@ -58,3 +65,10 @@ class Snake:
     def right(self):
         if self.head.heading() != LEFT:
             self.head.seth(RIGHT)
+
+    def reset(self):
+        for segment in self.snake:
+            segment.goto(1000,1000)
+        self.snake.clear()
+        self.create_snake()
+        self.head = self.snake[0]
