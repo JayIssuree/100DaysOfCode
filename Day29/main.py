@@ -1,7 +1,9 @@
+import email
 from tkinter import *
 from tkinter import messagebox
 from password_generator import Password_Generator
 import pyperclip
+import json
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
 
 password_generator = Password_Generator()
@@ -15,26 +17,51 @@ def generate_password():
 # ---------------------------- SAVE PASSWORD ------------------------------- #
 
 def write_to_file(data):
-    with open("data.txt", "a") as file:
-        file.write(data)
+    try:
+        with open("data.json", "r") as file:
+            old_data = json.load(file)
+    except FileNotFoundError:
+        with open("data.json", "w") as file:
+            json.dump(data, file, indent=4)
+    else:
+        old_data.update(data)
+        with open("data.json", "w") as file:
+            json.dump(old_data, file, indent=4)
 
 def save():
     website = website_entry.get()
     email_username = email_username_entry.get()
     password = password_entry.get()
-    data = f"{website} | {email_username} | {password} \n"
-
+    data = {
+        website: {
+            "email": email_username,
+            "password": password
+        }
+    }
     if len(website) == 0 or len(email_username) == 0 or len(password) == 0:
         messagebox.showerror(title="Ooops", message="Please don't leave any fields empty!")
     else:
-        is_ok = messagebox.askokcancel(title=website, message=f"These are the details entered: \n Email: {email_username} \n Password: {password} \n Is it ok to save?")
-        if is_ok:
-            write_to_file(data)
-            clear_entries()
+        write_to_file(data)
+        clear_entries()
 
 def clear_entries():
     website_entry.delete(0, END)
     password_entry.delete(0, END)
+
+# ---------------------------- SEARCH ------------------------------- #
+
+def find_password():
+    website = website_entry.get()
+    try:
+        with open("data.json", "r") as file:
+            data = json.load(file)
+            website_data = data[website]
+    except KeyError or FileNotFoundError:
+        messagebox.showerror(title="Ooops", message="No Data File Found")
+    else:
+        email = website_data["email"]
+        password = website_data["password"]
+        messagebox.showinfo(title=website, message=f"Email: {email} \nPassword: {password}")
 
 # ---------------------------- UI SETUP ------------------------------- #
 window = Tk()
@@ -47,9 +74,10 @@ canvas.create_image(100, 100, image=padlock_image)
 canvas.grid(row=0, column=1)
 
 website_label = Label(text="Website:").grid(row=1, column=0)
-website_entry = Entry(width=38)
-website_entry.grid(row=1, column=1, columnspan=2)
+website_entry = Entry(width=21)
+website_entry.grid(row=1, column=1)
 website_entry.focus()
+website_search = Button(text="Search", command=find_password, width=12).grid(row=1, column=2)
 
 email_username_label = Label(text="Email/Username:").grid(row=2, column=0)
 email_username_entry = Entry(width=38)
